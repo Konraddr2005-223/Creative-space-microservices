@@ -1,0 +1,18 @@
+server:
+  port: 8080 # Brama zawsze dzia?a na g?ównym porcie
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # Automatyczne tworzenie tras na podstawie nazw z Eureki
+          lower-case-service-id: true # Nazwy serwisów pisane ma?ymi literami
+
+eureka:
+  client:
+    serviceUrl:
+      # Tu mówimy Gatewayowi, gdzie jest Recepcja (Eureka)
+      defaultZone: http://localhost:8761/eureka/
