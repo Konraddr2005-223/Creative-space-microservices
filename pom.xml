@@ -26,12 +26,15 @@
     <modules>
         <module>service-discovery</module>
         <module>api-gateway</module>
+        <module>resource-service</module>
     </modules>
 
     <properties>
         <java.version>25</java.version>
         <!-- Spring Cloud train aligned with Boot 4.0.x (already used by Eureka/Gateway modules). -->
         <spring-cloud.version>2025.1.0</spring-cloud.version>
+        <!-- Boot 4.0.3 parent does not manage org.testcontainers:* versions; pin BOM explicitly. -->
+        <testcontainers.version>1.21.3</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -44,6 +47,13 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
