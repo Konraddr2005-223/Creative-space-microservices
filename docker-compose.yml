@@ -121,6 +121,13 @@ services:
       timeout: 5s
       retries: 10
 
+  # WHY Zipkin: lightweight UI to prove Micrometer spans across Gateway, Feign, and Kafka.
+  zipkin:
+    image: openzipkin/zipkin:3.4
+    container_name: cs-zipkin
+    ports:
+      - "${ZIPKIN_PORT:-9411}:9411"
+
 volumes:
   postgres-resource-data:
   postgres-booking-data:
