@@ -1,0 +1,85 @@
+{
+  "realm": "creative-space",
+  "enabled": true,
+  "displayName": "Creative Space",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "USER",
+        "description": "Standard booking user"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Catalog administrator"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "creative-space-public",
+      "name": "Creative Space Public (demo)",
+      "description": "Public client with password grant for local curl demos. Not for production.",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "enabled": true,
+      "email": "demo@creativespace.local",
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER"
+      ]
+    },
+    {
+      "username": "admin-user",
+      "enabled": true,
+      "email": "admin@creativespace.local",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER",
+        "ADMIN"
+      ]
+    }
+  ]
+}
