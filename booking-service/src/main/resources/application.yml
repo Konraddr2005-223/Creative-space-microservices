@@ -19,11 +19,37 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+# Empty url → resolve payment-service via Eureka. Override for local/stub tests.
+payment:
+  service:
+    url: ${PAYMENT_SERVICE_URL:}
 
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      payment:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+  retry:
+    instances:
+      payment:
+        max-attempts: 3
+        wait-duration: 200ms
+        retry-exceptions:
+          - java.io.IOException
+          - feign.RetryableException
 
 management:
   endpoints:
