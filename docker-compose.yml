@@ -1,0 +1,61 @@
+# Local infra for database-per-service.
+# Separate Postgres containers (not one DB with many schemas) so each service
+# owns its data store end-to-end — closer to real microservice boundaries.
+# Credentials are DEV defaults only; override via env in non-local setups.
+
+services:
+  postgres-resource:
+    image: postgres:17-alpine
+    container_name: cs-postgres-resource
+    environment:
+      POSTGRES_DB: ${RESOURCE_DB_NAME:-resource_db}
+      POSTGRES_USER: ${RESOURCE_DB_USER:-resource}
+      POSTGRES_PASSWORD: ${RESOURCE_DB_PASSWORD:-resource}
+    ports:
+      - "${RESOURCE_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-resource-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-booking:
+    image: postgres:17-alpine
+    container_name: cs-postgres-booking
+    environment:
+      POSTGRES_DB: ${BOOKING_DB_NAME:-booking_db}
+      POSTGRES_USER: ${BOOKING_DB_USER:-booking}
+      POSTGRES_PASSWORD: ${BOOKING_DB_PASSWORD:-booking}
+    ports:
+      - "${BOOKING_DB_PORT:-5433}:5432"
+    volumes:
+      - postgres-booking-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-payment:
+    image: postgres:17-alpine
+    container_name: cs-postgres-payment
+    environment:
+      POSTGRES_DB: ${PAYMENT_DB_NAME:-payment_db}
+      POSTGRES_USER: ${PAYMENT_DB_USER:-payment}
+      POSTGRES_PASSWORD: ${PAYMENT_DB_PASSWORD:-payment}
+    ports:
+      - "${PAYMENT_DB_PORT:-5434}:5432"
+    volumes:
+      - postgres-payment-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-resource-data:
+  postgres-booking-data:
+  postgres-payment-data:
