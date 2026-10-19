@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      WHY Spring Boot as parent (not a custom BOM alone):
+      Boot's parent manages plugin versions, dependency versions, and Java toolchain defaults.
+      We only override what the portfolio stack needs (Java 25, Spring Cloud BOM).
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.3</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>pl.creativespace</groupId>
+    <artifactId>creative-space-microservices</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>creative-space-microservices</name>
+    <description>Portfolio microservices platform for booking creative resources</description>
+
+    <modules>
+        <module>service-discovery</module>
+        <module>api-gateway</module>
+    </modules>
+
+    <properties>
+        <java.version>25</java.version>
+        <!-- Spring Cloud train aligned with Boot 4.0.x (already used by Eureka/Gateway modules). -->
+        <spring-cloud.version>2025.1.0</spring-cloud.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!--
+              WHY import Spring Cloud BOM here:
+              Child modules declare cloud starters without versions → one place to bump the train.
+            -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
