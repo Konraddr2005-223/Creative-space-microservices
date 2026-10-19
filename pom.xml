@@ -24,6 +24,7 @@
     <description>Portfolio microservices platform for booking creative resources</description>
 
     <modules>
+        <module>observability</module>
         <module>service-discovery</module>
         <module>api-gateway</module>
         <module>resource-service</module>
