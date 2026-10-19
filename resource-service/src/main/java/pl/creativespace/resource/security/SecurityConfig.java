@@ -23,6 +23,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+                        // WHY public docs: Swagger UI needs unauthenticated bootstrap; "Authorize" still sends JWT.
+                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/resources", "/api/resources/**").hasRole("ADMIN")

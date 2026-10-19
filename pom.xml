@@ -39,6 +39,8 @@
         <spring-cloud.version>2025.1.0</spring-cloud.version>
         <!-- Boot 4.0.3 parent does not manage org.testcontainers:* versions; pin BOM explicitly. -->
         <testcontainers.version>1.21.3</testcontainers.version>
+        <!-- springdoc 3.0.x = Spring Boot 4; 3.0.2 aligns with Boot 4.0.3 baseline. -->
+        <springdoc.version>3.0.2</springdoc.version>
     </properties>
 
     <dependencyManagement>
