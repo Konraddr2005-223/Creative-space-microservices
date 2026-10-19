@@ -55,6 +55,31 @@ services:
       timeout: 5s
       retries: 10
 
+  # WHY Keycloak (not a custom user-service): OAuth2/OIDC is the enterprise default.
+  # JWT validation stays at the Gateway for now; downstream services trust the internal network.
+  # Port 8180 on host avoids colliding with api-gateway (:8080).
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: cs-keycloak
+    command:
+      - start-dev
+      - --import-realm
+      - --health-enabled=true
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HTTP_PORT: 8080
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    volumes:
+      - ./infra/keycloak/creative-space-realm.json:/opt/keycloak/data/import/creative-space-realm.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
 volumes:
   postgres-resource-data:
   postgres-booking-data:

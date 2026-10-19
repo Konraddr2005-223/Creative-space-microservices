@@ -12,8 +12,21 @@ spring:
           # Trade-off: less explicit than declarative routes - fine for early portfolio stages.
           enabled: true
           lower-case-service-id: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # WHY issuer-uri: Boot fetches JWKS from Keycloak discovery; rotating keys stay in sync.
+          # Override when Keycloak is not on localhost (e.g. Docker-to-host networking).
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/creative-space}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
