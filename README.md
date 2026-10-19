@@ -2,6 +2,8 @@
 
 Portfolio platform for hourly booking of creative resources (studios, equipment, workshops).
 
+[![ci](https://github.com/Konraddr2005-223/Creative-space-microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/Konraddr2005-223/Creative-space-microservices/actions/workflows/ci.yml)
+
 **Stack:** Java 25 · Spring Boot 4.0.3 · Spring Cloud 2025.1.0 · PostgreSQL · Kafka (KRaft) · Keycloak · Docker Compose
 
 Goal: show distributed-systems patterns (concurrency, saga compensation, transactional outbox), not just “many Spring Boot apps”.
