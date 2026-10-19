@@ -27,6 +27,7 @@
         <module>service-discovery</module>
         <module>api-gateway</module>
         <module>resource-service</module>
+        <module>booking-service</module>
     </modules>
 
     <properties>
