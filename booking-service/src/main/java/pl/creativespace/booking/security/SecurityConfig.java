@@ -3,15 +3,15 @@ package pl.creativespace.booking.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import pl.creativespace.observability.security.KeycloakJwtAuthConverter;
 
 /**
- * Defense-in-depth: validate Keycloak JWT even if the caller bypasses the Gateway.
- * Feign calls to payment-service relay the same Bearer token (see JwtRelayRequestInterceptor).
+ * Booking API: any authenticated realm user (USER or ADMIN).
+ * Feign to payment relays the same Bearer token.
  */
 @Configuration
 @EnableWebSecurity
@@ -27,7 +27,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
+                        jwt.jwtAuthenticationConverter(new KeycloakJwtAuthConverter())));
 
         return http.build();
     }

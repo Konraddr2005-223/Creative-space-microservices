@@ -3,15 +3,12 @@ package pl.creativespace.payment.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import pl.creativespace.observability.security.KeycloakJwtAuthConverter;
 
-/**
- * Defense-in-depth: booking-service Feign calls must present a Bearer JWT (relayed from the user request).
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -26,7 +23,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
+                        jwt.jwtAuthenticationConverter(new KeycloakJwtAuthConverter())));
 
         return http.build();
     }
