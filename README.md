@@ -17,6 +17,7 @@ Goal: show distributed-systems patterns (concurrency, saga compensation, transac
 | At-least-once delivery | Idempotent `notification-service` (`processed_events` PK = `eventId`) |
 | Edge + service auth | Keycloak JWT at Gateway and resource/booking/payment (Feign relays Bearer) |
 | RBAC | Keycloak realm roles → `ROLE_*`; catalog writes require `ADMIN` |
+| API docs | springdoc-openapi (Swagger UI) on resource/booking/payment |
 | Distributed tracing | Micrometer Tracing (Brave) → Zipkin; outbox stores/restores context for Kafka |
 
 ## Services & ports
@@ -86,6 +87,16 @@ From separate terminals (or your IDE):
 ```
 
 Check Eureka: http://localhost:8761 — all apps except Eureka itself should register.
+
+### Swagger UI (OpenAPI)
+
+springdoc on resource / booking / payment. Docs endpoints are public; use **Authorize** with a Keycloak Bearer token for Try it out.
+
+| Service | Direct | Via Gateway |
+|---------|--------|-------------|
+| resource | http://localhost:8081/swagger-ui.html | http://localhost:8080/resource-service/swagger-ui.html |
+| booking | http://localhost:8082/swagger-ui.html | http://localhost:8080/booking-service/swagger-ui.html |
+| payment | http://localhost:8083/swagger-ui.html | http://localhost:8080/payment-service/swagger-ui.html |
 
 ## 4. Curl demo
 
