@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: resource-service
+  config:
+    import: optional:classpath:observability-defaults.yml
   datasource:
     url: ${RESOURCE_DB_URL:jdbc:postgresql://localhost:5432/resource_db}
     username: ${RESOURCE_DB_USER:resource}

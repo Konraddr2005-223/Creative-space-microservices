@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: booking-service
+  config:
+    import: optional:classpath:observability-defaults.yml
   datasource:
     url: ${BOOKING_DB_URL:jdbc:postgresql://localhost:5433/booking_db}
     username: ${BOOKING_DB_USER:booking}
@@ -25,6 +27,9 @@ spring:
         enabled: true
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    template:
+      # WHY: Kafka producer spans inherit restored outbox trace context.
+      observation-enabled: true
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer

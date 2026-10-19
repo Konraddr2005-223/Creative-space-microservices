@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: payment-service
+  config:
+    import: optional:classpath:observability-defaults.yml
   datasource:
     url: ${PAYMENT_DB_URL:jdbc:postgresql://localhost:5434/payment_db}
     username: ${PAYMENT_DB_USER:payment}

@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
+  config:
+    import: optional:classpath:observability-defaults.yml
   cloud:
     gateway:
       discovery:

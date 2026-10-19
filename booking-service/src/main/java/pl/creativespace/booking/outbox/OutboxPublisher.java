@@ -25,17 +25,20 @@ public class OutboxPublisher {
 
     private final OutboxMessageRepository outboxMessageRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final TraceContextCarrier traceContextCarrier;
     private final String topic;
     private final int batchSize;
 
     public OutboxPublisher(
             OutboxMessageRepository outboxMessageRepository,
             KafkaTemplate<String, String> kafkaTemplate,
+            TraceContextCarrier traceContextCarrier,
             @Value("${app.kafka.booking-events-topic:booking.events}") String topic,
             @Value("${app.outbox.batch-size:50}") int batchSize
     ) {
         this.outboxMessageRepository = outboxMessageRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.traceContextCarrier = traceContextCarrier;
         this.topic = topic;
         this.batchSize = batchSize;
     }
@@ -47,7 +50,13 @@ public class OutboxPublisher {
                 .findByPublishedAtIsNullOrderByCreatedAtAsc(PageRequest.of(0, batchSize));
         for (OutboxMessage message : batch) {
             try {
-                kafkaTemplate.send(topic, message.getAggregateId().toString(), message.getPayload()).get();
+                traceContextCarrier.runWithRestored(message.getTraceContext(), () -> {
+                    try {
+                        kafkaTemplate.send(topic, message.getAggregateId().toString(), message.getPayload()).get();
+                    } catch (Exception ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                });
                 message.markPublished();
             } catch (Exception ex) {
                 log.warn("Outbox publish failed for {}: {}", message.getId(), ex.toString());
