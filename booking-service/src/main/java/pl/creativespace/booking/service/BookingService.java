@@ -9,6 +9,8 @@ import pl.creativespace.booking.domain.Booking;
 import pl.creativespace.booking.domain.BookingStatus;
 import pl.creativespace.booking.dto.BookingResponse;
 import pl.creativespace.booking.dto.CreateBookingRequest;
+import pl.creativespace.booking.messaging.BookingEventType;
+import pl.creativespace.booking.outbox.OutboxService;
 import pl.creativespace.booking.repository.BookingRepository;
 
 import java.util.List;
@@ -18,9 +20,11 @@ import java.util.UUID;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final OutboxService outboxService;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, OutboxService outboxService) {
         this.bookingRepository = bookingRepository;
+        this.outboxService = outboxService;
     }
 
     @Transactional
@@ -62,8 +66,13 @@ public class BookingService {
     @Transactional
     public BookingResponse cancel(UUID id) {
         Booking booking = requireBooking(id);
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            return BookingResponse.from(booking);
+        }
         booking.cancel();
-        return BookingResponse.from(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+        outboxService.enqueue(saved, BookingEventType.BOOKING_CANCELLED);
+        return BookingResponse.from(saved);
     }
 
     @Transactional
@@ -71,7 +80,9 @@ public class BookingService {
         Booking booking = requireBooking(id);
         try {
             booking.confirm();
-            return BookingResponse.from(bookingRepository.saveAndFlush(booking));
+            Booking saved = bookingRepository.saveAndFlush(booking);
+            outboxService.enqueue(saved, BookingEventType.BOOKING_CONFIRMED);
+            return BookingResponse.from(saved);
         } catch (IllegalStateException ex) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
         }
