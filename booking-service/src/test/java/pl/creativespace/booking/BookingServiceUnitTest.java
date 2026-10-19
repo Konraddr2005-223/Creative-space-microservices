@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import pl.creativespace.booking.domain.Booking;
 import pl.creativespace.booking.domain.BookingStatus;
 import pl.creativespace.booking.dto.CreateBookingRequest;
+import pl.creativespace.booking.outbox.OutboxService;
 import pl.creativespace.booking.repository.BookingRepository;
 import pl.creativespace.booking.service.BookingService;
 
@@ -25,6 +26,9 @@ class BookingServiceUnitTest {
 
     @Mock
     BookingRepository bookingRepository;
+
+    @Mock
+    OutboxService outboxService;
 
     @InjectMocks
     BookingService bookingService;

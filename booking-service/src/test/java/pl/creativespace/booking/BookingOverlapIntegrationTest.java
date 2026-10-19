@@ -55,6 +55,10 @@ class BookingOverlapIntegrationTest {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("eureka.client.enabled", () -> "false");
         registry.add("spring.cloud.discovery.enabled", () -> "false");
+        // WHY: overlap tests do not need Kafka; disable poller so context stays lightweight.
+        registry.add("app.outbox.enabled", () -> "false");
+        registry.add("spring.autoconfigure.exclude",
+                () -> "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration");
     }
 
     @Autowired
