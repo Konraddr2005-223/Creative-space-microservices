@@ -28,6 +28,12 @@ public class OutboxMessage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String payload;
 
+    /**
+     * JSON map of propagation headers (e.g. traceparent / b3) captured at enqueue time.
+     */
+    @Column(columnDefinition = "TEXT")
+    private String traceContext;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -36,12 +42,20 @@ public class OutboxMessage {
     protected OutboxMessage() {
     }
 
-    public OutboxMessage(UUID id, String aggregateType, UUID aggregateId, String eventType, String payload) {
+    public OutboxMessage(
+            UUID id,
+            String aggregateType,
+            UUID aggregateId,
+            String eventType,
+            String payload,
+            String traceContext
+    ) {
         this.id = id;
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
         this.payload = payload;
+        this.traceContext = traceContext;
     }
 
     @PrePersist
@@ -73,6 +87,10 @@ public class OutboxMessage {
 
     public String getPayload() {
         return payload;
+    }
+
+    public String getTraceContext() {
+        return traceContext;
     }
 
     public Instant getCreatedAt() {

@@ -18,10 +18,16 @@ public class OutboxService {
 
     private final OutboxMessageRepository outboxMessageRepository;
     private final ObjectMapper objectMapper;
+    private final TraceContextCarrier traceContextCarrier;
 
-    public OutboxService(OutboxMessageRepository outboxMessageRepository, ObjectMapper objectMapper) {
+    public OutboxService(
+            OutboxMessageRepository outboxMessageRepository,
+            ObjectMapper objectMapper,
+            TraceContextCarrier traceContextCarrier
+    ) {
         this.outboxMessageRepository = outboxMessageRepository;
         this.objectMapper = objectMapper;
+        this.traceContextCarrier = traceContextCarrier;
     }
 
     /**
@@ -45,7 +51,8 @@ public class OutboxService {
                 AGGREGATE_BOOKING,
                 booking.getId(),
                 type.name(),
-                toJson(event)
+                toJson(event),
+                traceContextCarrier.captureCurrent()
         ));
     }
 
