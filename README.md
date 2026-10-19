@@ -15,7 +15,7 @@ Goal: show distributed-systems patterns (concurrency, saga compensation, transac
 | Reservation → payment → confirm/compensate | Orchestrated saga: Feign + Resilience4j (`POST /api/bookings/{id}/checkout`) |
 | Reliable domain events | Transactional Outbox in `booking-service` → Kafka `booking.events` |
 | At-least-once delivery | Idempotent `notification-service` (`processed_events` PK = `eventId`) |
-| Edge auth | Keycloak JWT validated at **API Gateway** only (for now) |
+| Edge + service auth | Keycloak JWT at Gateway and resource/booking/payment (Feign relays Bearer) |
 | Distributed tracing | Micrometer Tracing (Brave) → Zipkin; outbox stores/restores context for Kafka |
 
 ## Services & ports
@@ -189,7 +189,8 @@ creative-space-microservices/
 
 ## Known portfolio trade-offs
 
-- JWT only at Gateway — services on the Docker/host network are not resource-servers yet.
+- JWT on Gateway + resource/booking/payment; notification-service stays open (Kafka consumer).
+- Booking Feign relays the inbound Authorization header to payment-service.
 - Saga is synchronous Feign (no Kafka for the payment step); Outbox/Kafka is for fan-out after state changes.
 - Password grant is for local demos; do not use it in production.
 - Docker must be running for Testcontainers integration tests; without it those tests are skipped.

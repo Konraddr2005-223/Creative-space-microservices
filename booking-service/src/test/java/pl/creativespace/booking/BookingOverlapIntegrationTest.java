@@ -58,7 +58,10 @@ class BookingOverlapIntegrationTest {
         // WHY: overlap tests do not need Kafka; disable poller so context stays lightweight.
         registry.add("app.outbox.enabled", () -> "false");
         registry.add("spring.autoconfigure.exclude",
-                () -> "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration");
+                () -> "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration,"
+                        + "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,"
+                        + "org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration");
+        registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
     }
 
     @Autowired
