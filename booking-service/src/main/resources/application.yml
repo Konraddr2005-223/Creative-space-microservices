@@ -23,11 +23,25 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
 
 # Empty url → resolve payment-service via Eureka. Override for local/stub tests.
 payment:
   service:
     url: ${PAYMENT_SERVICE_URL:}
+
+app:
+  kafka:
+    booking-events-topic: ${BOOKING_EVENTS_TOPIC:booking.events}
+  outbox:
+    enabled: true
+    poll-interval-ms: 1000
+    batch-size: 50
 
 eureka:
   client:
