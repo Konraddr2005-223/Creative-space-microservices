@@ -28,6 +28,7 @@
         <module>api-gateway</module>
         <module>resource-service</module>
         <module>booking-service</module>
+        <module>payment-service</module>
     </modules>
 
     <properties>
