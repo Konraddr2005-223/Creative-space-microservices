@@ -16,6 +16,7 @@ Goal: show distributed-systems patterns (concurrency, saga compensation, transac
 | Reliable domain events | Transactional Outbox in `booking-service` → Kafka `booking.events` |
 | At-least-once delivery | Idempotent `notification-service` (`processed_events` PK = `eventId`) |
 | Edge auth | Keycloak JWT validated at **API Gateway** only (for now) |
+| Distributed tracing | Micrometer Tracing (Brave) → Zipkin; outbox stores/restores context for Kafka |
 
 ## Services & ports
 
@@ -29,6 +30,7 @@ Goal: show distributed-systems patterns (concurrency, saga compensation, transac
 | `notification-service` | 8084 | Kafka consumer (log channel) |
 | Keycloak | 8180 | OIDC / demo users |
 | Kafka | 9092 | `booking.events` |
+| Zipkin | 9411 | Trace UI (`traceId` across Gateway → Feign → Outbox → Kafka) |
 | Postgres (resource / booking / payment / notification) | 5432–5435 | Database-per-service |
 
 ## Prerequisites
@@ -150,6 +152,8 @@ curl -s -X POST "http://localhost:8080/booking-service/api/bookings/$BOOKING_ID/
 
 Watch `notification-service` logs for a `Notification recorded: ... BOOKING_CONFIRMED ...` line (outbox poller delay ~1s).
 
+Logs include `[service-name,traceId,spanId]`. Open Zipkin at http://localhost:9411 and search by that `traceId` — you should see Gateway → booking → payment (Feign) and later the outbox/Kafka/notification spans in the **same** trace (propagation map is stored on the outbox row).
+
 ### Checkout failure + compensation
 
 Create another booking on a free slot, then force payment failure:
@@ -172,6 +176,7 @@ Two overlapping create calls for the same `resourceId` → one `201`, one `409` 
 
 ```
 creative-space-microservices/
+  observability/        # Brave + Zipkin defaults (shared jar)
   service-discovery/
   api-gateway/
   resource-service/
