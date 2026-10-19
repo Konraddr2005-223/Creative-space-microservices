@@ -37,9 +37,13 @@ class ResourceCatalogIntegrationTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
-        // WHY: tests should not depend on a running Eureka; discovery is infra, not catalog logic.
+        // WHY: tests should not depend on a running Eureka or Keycloak.
         registry.add("eureka.client.enabled", () -> "false");
         registry.add("spring.cloud.discovery.enabled", () -> "false");
+        registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
+        registry.add("spring.autoconfigure.exclude",
+                () -> "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,"
+                        + "org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration");
     }
 
     @Autowired

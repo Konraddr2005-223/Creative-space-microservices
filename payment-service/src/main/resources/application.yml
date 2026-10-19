@@ -20,6 +20,11 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/creative-space}
 
 eureka:
   client:
