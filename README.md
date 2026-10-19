@@ -16,6 +16,7 @@ Goal: show distributed-systems patterns (concurrency, saga compensation, transac
 | Reliable domain events | Transactional Outbox in `booking-service` → Kafka `booking.events` |
 | At-least-once delivery | Idempotent `notification-service` (`processed_events` PK = `eventId`) |
 | Edge + service auth | Keycloak JWT at Gateway and resource/booking/payment (Feign relays Bearer) |
+| RBAC | Keycloak realm roles → `ROLE_*`; catalog writes require `ADMIN` |
 | Distributed tracing | Micrometer Tracing (Brave) → Zipkin; outbox stores/restores context for Kafka |
 
 ## Services & ports
