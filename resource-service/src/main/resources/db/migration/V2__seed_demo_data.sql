@@ -1,0 +1,45 @@
+-- Demo catalog for local/portfolio demos. Stable UUIDs keep examples reproducible.
+INSERT INTO resources (id, name, type, description, location, active, created_at, updated_at, version)
+VALUES
+    ('11111111-1111-1111-1111-111111111111',
+     'Analog Recording Studio A',
+     'STUDIO',
+     'Isolated booth + control room with analog desk',
+     'Warsaw, Praga',
+     TRUE,
+     TIMESTAMPTZ '2026-01-01 10:00:00+00',
+     TIMESTAMPTZ '2026-01-01 10:00:00+00',
+     0),
+    ('22222222-2222-2222-2222-222222222222',
+     'Sony FX6 Cinema Camera Kit',
+     'EQUIPMENT',
+     'Body, 3 lenses, cage, batteries',
+     'Krakow warehouse',
+     TRUE,
+     TIMESTAMPTZ '2026-01-01 10:00:00+00',
+     TIMESTAMPTZ '2026-01-01 10:00:00+00',
+     0),
+    ('33333333-3333-3333-3333-333333333333',
+     'Ceramic Workshop Hall',
+     'WORKSHOP',
+     'Kiln access and 8 potter wheels',
+     'Gdansk Old Town',
+     TRUE,
+     TIMESTAMPTZ '2026-01-01 10:00:00+00',
+     TIMESTAMPTZ '2026-01-01 10:00:00+00',
+     0);
+
+INSERT INTO price_tiers (id, resource_id, unit, amount, currency, valid_from, valid_to, created_at)
+VALUES
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+     '11111111-1111-1111-1111-111111111111',
+     'HOUR', 180.00, 'PLN', NULL, NULL,
+     TIMESTAMPTZ '2026-01-01 10:00:00+00'),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+     '22222222-2222-2222-2222-222222222222',
+     'HOUR', 95.00, 'PLN', NULL, NULL,
+     TIMESTAMPTZ '2026-01-01 10:00:00+00'),
+    ('cccccccc-cccc-cccc-cccc-cccccccccccc',
+     '33333333-3333-3333-3333-333333333333',
+     'HOUR', 120.00, 'PLN', NULL, NULL,
+     TIMESTAMPTZ '2026-01-01 10:00:00+00');

@@ -1,0 +1,32 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: resource-service
+  datasource:
+    url: ${RESOURCE_DB_URL:jdbc:postgresql://localhost:5432/resource_db}
+    username: ${RESOURCE_DB_USER:resource}
+    password: ${RESOURCE_DB_PASSWORD:resource}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # WHY validate: Flyway owns the schema. ddl-auto=update would hide migration mistakes.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
