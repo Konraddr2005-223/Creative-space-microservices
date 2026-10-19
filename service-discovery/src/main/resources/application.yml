@@ -11,3 +11,9 @@ eureka:
     # Registering/fetching itself is only useful in peer-aware clusters.
     register-with-eureka: false
     fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

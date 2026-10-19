@@ -18,9 +18,10 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # WHY issuer-uri: Boot fetches JWKS from Keycloak discovery; rotating keys stay in sync.
-          # Override when Keycloak is not on localhost (e.g. Docker-to-host networking).
+          # WHY issuer-uri: validates JWT `iss` (tokens from host use localhost:8180).
+          # WHY separate jwk-set-uri: Docker apps fetch certs via keycloak:8080 while iss stays localhost.
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/creative-space}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/creative-space/protocol/openid-connect/certs}
 
 eureka:
   client:

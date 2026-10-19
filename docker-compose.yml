@@ -80,20 +80,20 @@ services:
       retries: 12
       start_period: 40s
 
-  # WHY KRaft (no Zookeeper): fewer moving parts for local demos; Bitnami image is common in tutorials.
-  # advertised localhost:9092 so host-run Spring Boot apps can produce/consume.
+  # WHY dual listeners: host apps use localhost:9092 (mapped → 29092); containers use kafka:9092.
   kafka:
     image: bitnami/kafka:3.9
     container_name: cs-kafka
     ports:
-      - "${KAFKA_PORT:-9092}:9092"
+      - "${KAFKA_PORT:-9092}:29092"
     environment:
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
       ALLOW_PLAINTEXT_LISTENER: "yes"
@@ -127,6 +127,150 @@ services:
     container_name: cs-zipkin
     ports:
       - "${ZIPKIN_PORT:-9411}:9411"
+
+  # --- Application stack (profile: apps) ---
+  # Start with: docker compose --profile apps up -d --build
+  # JWT iss stays http://localhost:8180/... (tokens from host); JWKS fetched from keycloak:8080 inside the network.
+
+  service-discovery:
+    profiles: ["apps"]
+    build:
+      context: .
+      args:
+        MODULE: service-discovery
+    image: cs-service-discovery:local
+    container_name: cs-service-discovery
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    profiles: ["apps"]
+    build:
+      context: .
+      args:
+        MODULE: api-gateway
+    image: cs-api-gateway:local
+    container_name: cs-api-gateway
+    depends_on:
+      service-discovery:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/creative-space
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/creative-space/protocol/openid-connect/certs
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8080:8080"
+
+  resource-service:
+    profiles: ["apps"]
+    build:
+      context: .
+      args:
+        MODULE: resource-service
+    image: cs-resource-service:local
+    container_name: cs-resource-service
+    depends_on:
+      service-discovery:
+        condition: service_started
+      postgres-resource:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      RESOURCE_DB_URL: jdbc:postgresql://postgres-resource:5432/resource_db
+      RESOURCE_DB_USER: resource
+      RESOURCE_DB_PASSWORD: resource
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/creative-space
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/creative-space/protocol/openid-connect/certs
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8081:8081"
+
+  payment-service:
+    profiles: ["apps"]
+    build:
+      context: .
+      args:
+        MODULE: payment-service
+    image: cs-payment-service:local
+    container_name: cs-payment-service
+    depends_on:
+      service-discovery:
+        condition: service_started
+      postgres-payment:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      PAYMENT_DB_URL: jdbc:postgresql://postgres-payment:5432/payment_db
+      PAYMENT_DB_USER: payment
+      PAYMENT_DB_PASSWORD: payment
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/creative-space
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/creative-space/protocol/openid-connect/certs
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8083:8083"
+
+  booking-service:
+    profiles: ["apps"]
+    build:
+      context: .
+      args:
+        MODULE: booking-service
+    image: cs-booking-service:local
+    container_name: cs-booking-service
+    depends_on:
+      service-discovery:
+        condition: service_started
+      postgres-booking:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      payment-service:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      BOOKING_DB_URL: jdbc:postgresql://postgres-booking:5432/booking_db
+      BOOKING_DB_USER: booking
+      BOOKING_DB_PASSWORD: booking
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/creative-space
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/creative-space/protocol/openid-connect/certs
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8082:8082"
+
+  notification-service:
+    profiles: ["apps"]
+    build:
+      context: .
+      args:
+        MODULE: notification-service
+    image: cs-notification-service:local
+    container_name: cs-notification-service
+    depends_on:
+      service-discovery:
+        condition: service_started
+      postgres-notification:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+      NOTIFICATION_DB_URL: jdbc:postgresql://postgres-notification:5432/notification_db
+      NOTIFICATION_DB_USER: notification
+      NOTIFICATION_DB_PASSWORD: notification
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_ENDPOINT: http://zipkin:9411/api/v2/spans
+    ports:
+      - "8084:8084"
 
 volumes:
   postgres-resource-data:

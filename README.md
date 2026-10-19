@@ -56,6 +56,21 @@ docker compose up -d
 
 Wait until Postgres, Kafka, and Keycloak are healthy. Keycloak admin UI: http://localhost:8180 (`admin` / `admin`).
 
+### Or: infra + apps in Docker
+
+```bash
+docker compose --profile apps up -d --build
+```
+
+Kafka uses dual listeners: host clients → `localhost:9092`, containers → `kafka:9092`. JWT `iss` stays `http://localhost:8180/...`; containers fetch JWKS from `keycloak:8080`.
+
+Smoke after apps are up:
+
+```powershell
+./scripts/smoke.ps1
+# bash: ./scripts/smoke.sh
+```
+
 Imported realm `creative-space`:
 
 | User | Password | Roles |
@@ -196,7 +211,9 @@ creative-space-microservices/
   payment-service/      # simulated charge + force-failure header
   notification-service/ # idempotent Kafka consumer
   infra/keycloak/
-  docker-compose.yml
+  scripts/smoke.ps1|smoke.sh
+  Dockerfile              # MODULE=… fat-jar for compose profile apps
+  docker-compose.yml      # infra always; apps via --profile apps
 ```
 
 ## Known portfolio trade-offs
